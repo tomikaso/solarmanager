@@ -7,6 +7,7 @@ import relais
 import temperature
 from datetime import datetime, timezone, timedelta
 import plotenergy
+import constants
 
 # own functions
 def runtime(time):
@@ -23,9 +24,9 @@ relais.init_relais()
 relais.plug1_off()
 relais.boiler_off()
 relais.heatpump_enabled()
-api_url = "https://monitoringapi.solaredge.com/site/3452377/currentPowerFlow.json?api_key=XWX5XJW7E2Q9AGY1HOAMF2H15KZF5PLJ"
-pathBoiler = "/sys/bus/w1/devices/28-00000d27f2be/w1_slave"
-pathHouse = "/sys/bus/w1/devices/28-00000d27ee12/w1_slave"
+api_url = constants.api_url
+pathBoiler = constants.pathBoiler
+pathHouse = constants.pathHouse
 loops = 1
 plug1_state = "off"
 boiler_state = "off"
