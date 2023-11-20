@@ -1,6 +1,0 @@
-Apr 16 10:31:07 kunterbunty PackageKit: refresh-cache transaction /99_cbaaeece from uid 1000 finished with success after 4515ms
-Apr 16 10:31:20 kunterbunty PackageKit: get-updates transaction /100_aadcebae from uid 1000 finished with success after 12594ms
-Apr 17 10:31:07 kunterbunty PackageKit: refresh-cache transaction /101_edbbeabb from uid 1000 finished with success after 4477ms
-Apr 17 10:31:21 kunterbunty PackageKit: get-updates transaction /102_cbaaceae from uid 1000 finished with success after 14171ms
-Apr 18 10:31:07 kunterbunty PackageKit: refresh-cache transaction /103_eabdbdbe from uid 1000 finished with success after 4613ms
-Apr 18 10:31:18 kunterbunty PackageKit: get-updates transaction /104_eadbaabb from uid 1000 finished with success after 10945ms
