@@ -148,7 +148,7 @@ while True:
         relais.heatpump_blocked()
 
         #determine Heat Pump State appriciated: will reduce the sensor-temperature of the heatpump by 4.7K (20kOhm in serie)
-    if boiler_temp < 48 and astro_data.theo_power >4000 and GridPower < -2500:
+    if boiler_temp < 48 and astro_data.theo_power >4000 and GridPower < -0.4* astro_data.theo_max:
         heatpump_state = "appreciated"
         heatpump_appreciated_until = datetime.now() + timedelta (minutes=20)
         relais.heatpump_appreciated()
@@ -177,8 +177,8 @@ while True:
     no_desinfect = datetime.now().replace(tzinfo=None)  - desinfected.replace(tzinfo=None)
     if (boiler_state == "off") and (status=="online") and (no_desinfect.days > desinfect_max_interval) and heatpump_state !="appreciated"  \
         and (astro_data.utctime > 10.5) and (astro_data.utctime < 15) \
-        and ((GridPower < - 3600 and astro_data.theo_power > 4000)  or \
-            ((no_desinfect.days > desinfect_max_interval + 3) and (astro_data.utctime >11.8) and today.weekday() > 4)):
+        and ((GridPower < - 3000 and astro_data.theo_power > 4000)  or \
+            ((no_desinfect.days > desinfect_max_interval + 3) and (astro_data.utctime >11.6) and today.weekday() > 4)):
         relais.boiler_on()
         boiler_state = "desinfect"
         boiler_state_since = datetime.now()
