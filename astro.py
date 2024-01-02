@@ -4,14 +4,15 @@ import math
 
 class astro:
     def __init__(self, time):
-        self.latitude = 47
+        self.latitude = 47.255
+        self.longitude = 8.771
         self.post_winter_solistude = time.month * 30 + time.day - 20
         if self.post_winter_solistude >= 360:
             self.post_winter_solistude = self.post_winter_solistude - 360
         self.time_equation = - 0.125 * math.sin((self.post_winter_solistude - 16) / 180 * math.pi) - 0.167 * math.sin(self.post_winter_solistude / 90 * math.pi)
         self.maxdeclination = self.latitude - 23.5 * math.cos(self.post_winter_solistude / 360 * 6.28)
         self.daylength = 12.2 - 3.74 * math.cos(self.post_winter_solistude / 360 * 6.28)
-        self.sunrise = 11.36 - self.time_equation - self.daylength / 2
+        self.sunrise = 11.95 - self.longitude/15 - self.time_equation - self.daylength / 2
         self.sunset = self.sunrise + self.daylength
         self.utctime = time.hour + time.minute / 60
         if self.utctime > self.sunrise and self.utctime < self.sunset:
