@@ -1,5 +1,5 @@
 let slideIndex = 0;
-let maxSlides = 18;
+let maxSlides = 90;
 let file1 = 'history/electricpower';
 let file2 = 'history/boiltemp';
 let file3 = 'history/housetemp';
