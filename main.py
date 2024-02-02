@@ -1,4 +1,4 @@
-# Kunterbunt_Solar_Manager (c) Thomas, March 2023
+# Kunterbunt_Solar_Manager (c) Thomas, February 2024
 import math
 import requests
 from astro import astro
@@ -11,14 +11,14 @@ import constants
 
 
 # own functions
-def runtime(time):
-    if time < 60:
-        return str(int(time)) + " min"
+def runtime(minute_display):
+    if minute_display < 60:
+        return str(int(minute_display)) + " min"
     else:
-        if int(time - int(time / 60) * 60) > 9:
-            return str(int(time / 60)) + ":" + str(int(time - int(time / 60) * 60)) + " hr"
+        if int(minute_display - int(minute_display / 60) * 60) > 9:
+            return str(int(minute_display / 60)) + ":" + str(int(minute_display - int(minute_display / 60) * 60)) + " hr"
         else:
-            return str(int(time / 60)) + ":0" + str(int(time - int(time / 60) * 60)) + " hr"
+            return str(int(minute_display / 60)) + ":0" + str(int(minute_display - int(minute_display / 60) * 60)) + " hr"
 
 
 # set parameters
@@ -34,9 +34,9 @@ plug1_state = "off"
 boiler_state = "off"
 heatpump_state = "automatic"
 boiler_max = 60
-desinfect_target = 57
+disinfect_target = 57
 boiler_hysteresis = 2
-desinfect_max_interval = 4
+disinfect_max_interval = 4
 
 # set variables
 minutes_boiler = 0
@@ -48,12 +48,12 @@ sum_export = 0
 sum_hp_blocked = 0
 today_previous = datetime.now(timezone.utc)
 
-# determine last desinfection after restart
+# determine last disinfection after restart
 solar_status_file = open('/home/solarmanager/Documents/solarstatus.txt', "r")
-firstline = solar_status_file.readline()
-secondline = solar_status_file.readline()
-desinfect_date = secondline.find('desinfection:') + 14
-desinfected = datetime.strptime(str(secondline)[desinfect_date:(desinfect_date + 10)], "%d/%m/%Y")
+first_line = solar_status_file.readline()
+second_line = solar_status_file.readline()
+disinfect_date = second_line.find('disinfection:') + 14
+disinfected = datetime.strptime(str(second_line)[disinfect_date:(disinfect_date + 10)], "%d/%m/%Y")
 solar_status_file.close()
 
 boiler_state_since = datetime.now()
@@ -90,7 +90,7 @@ while True:
         print(conerr)
         status = "save_mode"
     except requests.exceptions.RequestException as err:
-        print("Request exeption: switching to save mode")
+        print("Request exception: switching to save mode")
         status = "save_mode"
     if response.status_code != 200:
         print("http_error: switching to save mode")
@@ -122,7 +122,7 @@ while True:
         sum_export += -GridPower / 1000 * seconds_since / 3600
 
     # sum up plug and boiler time
-    if boiler_state == "exceed" or boiler_state == "desinfect":
+    if boiler_state == "exceed" or boiler_state == "disinfect":
         minutes_boiler = minutes_boiler + seconds_since / 60
     if plug1_state == "on":
         minutes_plug = minutes_plug + seconds_since / 60
@@ -140,17 +140,17 @@ while True:
         sum_grid = 0
         sum_export = 0
 
-    # temperatur ermitteln
+    # get temperature from sensors
     boiler_temp = temperature.read_sensor(pathBoiler)  # measured on top of the boiler
     house_temp = temperature.read_sensor(pathHouse)  # living-room
 
-    # determine Heat Pump State blocked: will incereas the sensor-temperature of the heatpump by 2.3K (800kOhm parallel)
-    if boiler_temp >= 44 and boiler_temp < 48.5 and astro_data.theo_power <= 3000:  # we still have hot water and no sun
+    # determine Heat Pump State blocked: will increase the sensor-temperature of the heatpump by 2.3K (800kOhm parallel)
+    if 44 <= boiler_temp < 48.5 and astro_data.theo_power <= 3000:  # we still have hot water and no sun
         heatpump_state = "blocked"
         relais.heatpump_blocked()
 
-        # determine Heat Pump State appriciated: will reduce the sensor-temperature of the heatpump by 4.7K (20kOhm in serie)
-    if boiler_temp < 48 and astro_data.theo_power > 4000 and GridPower < -0.4 * astro_data.theo_max:
+    # determine Heat Pump State appreciated: will reduce the sensor-temperature of the HP by 4.7K (20kOhm in series)
+    if boiler_temp < 48 and astro_data.theo_power > 4000 and GridPower < -0.4 * astro_data.theo_max and astro_data.utctime < 12.1:
         heatpump_state = "appreciated"
         heatpump_appreciated_until = datetime.now() + timedelta(minutes=20)
         relais.heatpump_appreciated()
@@ -162,9 +162,9 @@ while True:
         heatpump_state = "automatic"
         relais.heatpump_enabled()
 
-    # set new desinfection time (always 8 o'clock UTC)
-    if boiler_temp >= desinfect_target:
-        desinfected = today.replace(hour=8)
+    # set new disinfection time (always 8 o'clock UTC)
+    if boiler_temp >= disinfect_target:
+        disinfected = today.replace(hour=8)
 
     # boiler on-condition exceed of energy
     if (status == "online") and (boiler_temp < boiler_max - boiler_hysteresis) and (
@@ -177,24 +177,24 @@ while True:
     #    print ('Boiler turned on at: ', boiler_state_since, 'Boiler-Temp:', Boiler_temp)
 
     # disinfection boiler on: next weekend of if we have 60% of potential radiation
-    no_desinfect = datetime.now().replace(tzinfo=None) - desinfected.replace(tzinfo=None)
+    no_disinfect = datetime.now().replace(tzinfo=None) - disinfected.replace(tzinfo=None)
     if (boiler_state == "off") and (status == "online") and (
-            no_desinfect.days > desinfect_max_interval) and heatpump_state != "appreciated" \
+            no_disinfect.days > disinfect_max_interval) and heatpump_state != "appreciated" \
             and (astro_data.utctime > 10.5) and (astro_data.utctime < 15) \
             and ((GridPower < - 3000 and astro_data.theo_power > 4000) or
-                 ((no_desinfect.days > desinfect_max_interval + 3) and (
-                         astro_data.utctime > 11.6) and today.weekday() > 4)):
+                 ((no_disinfect.days > disinfect_max_interval + 3) and (
+                         astro_data.utctime > 12.6) and today.weekday() > 4)):
         relais.boiler_on()
-        boiler_state = "desinfect"
+        boiler_state = "disinfect"
         boiler_state_since = datetime.now()
-        boiler_pic = '<img src="boiler_desinfect.png" width=60>'
+        boiler_pic = '<img src="boiler_disinfect.png" width=60>'
 
     # boiler off condition
     if status != "online" \
             or boiler_temp >= boiler_max \
             or (boiler_state == "exceed" and (GridPower > 1200 or solar_power < 4800)) \
-            or (boiler_state == "desinfect" and boiler_temp >= desinfect_target) \
-            or ((no_desinfect.days <= desinfect_max_interval + 3) and (boiler_state == "desinfect") and (
+            or (boiler_state == "disinfect" and boiler_temp >= disinfect_target) \
+            or ((no_disinfect.days <= disinfect_max_interval + 3) and (boiler_state == "disinfect") and (
             GridPower > 5000 or solar_power < 1500)) \
             or (GridPower > 8000):
         relais.boiler_off()
@@ -226,8 +226,8 @@ while True:
     Status_str += "<br>solar kwh: " + str(round(sum_solar, 2)) + "<br>export kwh: " + str(
         round(sum_export, 2)) + "<br>heatpump: " + heatpump_state + "</td><td>"
     Status_str += "status: " + status + "<br>theoretical radiation: " + str(round(astro_data.theo_power, 1))
-    Status_str += "<br>max declination: " + str(round(astro_data.maxdeclination, 2)) + "<br>last desinfection: " + str(
-        desinfected.strftime("%d/%m/%Y"))
+    Status_str += "<br>max declination: " + str(round(astro_data.maxdeclination, 2)) + "<br>last disinfection: " + str(
+        disinfected.strftime("%d/%m/%Y"))
     Status_str += "<br>boiler-state-since: " + str(boiler_state_since.strftime("%H:%M")) + "<br>up since: " + str(
         up_since.strftime("%d/%m/%Y, %H:%M"))
     Status_str += "<br>own use kwh: " + str(round(sum_load, 2)) + "<br>import kwh: " + str(
@@ -284,7 +284,7 @@ while True:
 
     # blink to tell us, that you are alive for 60 seconds
     for i in range(4):
-        relais.led_on()  # show checklite_led
+        relais.led_on()  # show check_light_led
         time.sleep(3)
         relais.led_off()
         time.sleep(12)
