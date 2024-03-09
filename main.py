@@ -283,9 +283,17 @@ while True:
     plotenergy.plot_house(xh, yh, math.floor(min(yh) * 0.97), math.ceil(max(yh) * 1.03))
 
     # blink to tell us, that you are alive for 60 seconds
-    for i in range(4):
+    # one second is 1kW.
+    on_time = min(0.2 + solar_power / 1000, 8)
+    while datetime.now().second < 40:
         relais.led_on()  # show check_light_led
-        time.sleep(3)
+        time.sleep(on_time)
         relais.led_off()
-        time.sleep(12)
+        time.sleep(9-on_time)
+    # sync with minutes
+    while datetime.now().second > 39:
+        relais.led_on()  # show check_light_led
+        time.sleep(on_time)
+        relais.led_off()
+        time.sleep(9-on_time)
 # repeat for a long time

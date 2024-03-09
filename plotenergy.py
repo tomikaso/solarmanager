@@ -6,8 +6,14 @@ def plot_boiler(x, y, miny, maxy):
     ax = fig.add_subplot()
     ax.set_title('°C', loc='left', fontstyle='oblique', fontsize='medium')
     ax.plot(x, y, linewidth=2.0)
-    ax.set(xlim=(0, len(x)), xticks=np.arange(1, len(x), int((len(x)+10)/10)),
-       ylim=(miny, maxy), yticks=np.arange(miny, maxy, 2))
+    if len(x) > 100:
+        print(int(x[1][3:5]))
+        pos1 = 61 - int(x[1][3:5])
+        ax.set(xlim=(0, len(x)), xticks=np.arange(pos1, len(x), 60),
+               ylim=(miny, maxy), yticks=np.arange(miny, maxy, 2))
+    else:
+        ax.set(xlim=(0, len(x)), xticks=np.arange(1, len(x), int((len(x)+10)/10)),
+               ylim=(miny, maxy), yticks=np.arange(miny, maxy, 2))
     plt.ylabel('temperature')
     plt.title('Boiler temperature')
     plt.savefig("/var/www/html/boiltemp.png", dpi=100)
@@ -26,8 +32,14 @@ def plot_energy(x, y1, y2, y3, y4, y5, y6, miny, maxy):
     ax.plot(x, y4, linewidth=2.0, label='boiler state')
     ax.plot(x, y5, linewidth=2.0, label='plug state')
     ax.plot(x, y6, linewidth=2.0, label='hp state')
-    ax.set(xlim=(0, len(x)), xticks=np.arange(1, len(x), int((len(x)+10)/10)),
-           ylim=(miny, maxy), yticks=np.arange(miny, maxy, 1000))
+    if len(x) > 100:
+        print(int(x[1][3:5]))
+        pos1 = 61 - int(x[1][3:5])
+        ax.set(xlim=(0, len(x)), xticks=np.arange(pos1, len(x), 60),
+               ylim=(miny, maxy), yticks=np.arange(miny, maxy, 1000))
+    else:
+        ax.set(xlim=(0, len(x)), xticks=np.arange(1, len(x), int((len(x)+10)/10)),
+               ylim=(miny, maxy), yticks=np.arange(miny, maxy, 1000))
     plt.ylabel('power')
     plt.title('Electric power')
     plt.legend()
@@ -40,8 +52,14 @@ def plot_house(x, y, miny, maxy):
     ax = fig.add_subplot()
     ax.set_title('°C', loc='left', fontstyle='oblique', fontsize='medium')
     ax.plot(x, y, linewidth=2.0)
-    ax.set(xlim=(0, len(x)), xticks=np.arange(1, len(x), int((len(x)+10)/10)),
-           ylim=(miny, maxy), yticks=np.arange(miny, maxy, 1))
+    if len(x) > 100:
+        print(int(x[1][3:5]))
+        pos1 = 61 - int(x[1][3:5])
+        ax.set(xlim=(0, len(x)), xticks=np.arange(pos1, len(x), 60),
+               ylim=(miny, maxy), yticks=np.arange(miny, maxy, 1))
+    else:
+        ax.set(xlim=(0, len(x)), xticks=np.arange(1, len(x), int((len(x)+10)/10)),
+               ylim=(miny, maxy), yticks=np.arange(miny, maxy, 1))
     plt.ylabel('temperature')
     plt.title('Living room temperature')
     plt.savefig("/var/www/html/housetemp.png", dpi=100)
