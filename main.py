@@ -37,6 +37,7 @@ boiler_max = 60
 disinfect_target = 57
 boiler_hysteresis = 2
 disinfect_max_interval = 4
+chart_length = 14
 
 # set variables
 minutes_boiler = 0
@@ -62,18 +63,15 @@ heatpump_appreciated_until = datetime.now()
 
 plug_pic = '<img src="plug_off.png" width=60>'
 boiler_pic = '<img src="boiler_off.png" width=60>'
-x = [time.strftime("%H:%M"), time.strftime("%H:%M")]
-xh = [time.strftime("%H:%M"), time.strftime("%H:%M")]
-x1 = [time.strftime("%H:%M"), time.strftime("%H:%M")]
-y = [45, 45]
-yh = [20, 20]
-y1 = [1, 1]
-y2 = [1, 1]
-y3 = [1, 1]
-y4 = [1, 1]
-y5 = [1, 1]
-y6 = [1, 1]
-print('Kunterbunt SolarManager')
+x = [time.strftime("%H:%M")]
+y = [45]
+yh = [20]
+y1 = [1]
+y2 = [1]
+y3 = [1]
+y4 = [1]
+y5 = [1]
+y6 = [1]
 
 while True:
     localTime = datetime.now()
@@ -237,10 +235,12 @@ while True:
     statusfile.close()
 
     # create power chart
-    x1.append(time.strftime("%H:%M"))
+    x.append(time.strftime("%H:%M"))
     y1.append(LoadPower)
     y2.append(solar_power)
     y3.append(round(astro_data.theo_power, 2))
+    y.append(boiler_temp)
+    yh.append(house_temp)
     if boiler_state != 'off':
         y4.append(400)
     else:
@@ -256,44 +256,26 @@ while True:
             y6.append(150)
         else:
             y6.append(0)
-    if len(x1) > 720:
+    if len(x) > chart_length * 60:
         y1.pop(0)
         y2.pop(0)
         y3.pop(0)
         y4.pop(0)
         y5.pop(0)
         y6.pop(0)
-        x1.pop(0)
-    plotenergy.plot_energy(x1, y1, y2, y3, y4, y5, y6, 0, max(max(y3), max(y1)) * 1.1)
-
+        y.pop(0)  # boiler Temp
+        yh.pop(0)  # house Temp
+        x.pop(0)  # x-axis for all plots
+    plotenergy.plot_energy(x, y1, y2, y3, y4, y5, y6, 0, max(max(y3), max(y1)) * 1.1)
     # create Boiler temperature chart
-    x.append(time.strftime("%H:%M"))
-    y.append(boiler_temp)
-    if len(x) > 720:
-        y.pop(0)
-        x.pop(0)
     plotenergy.plot_boiler(x, y, math.floor(min(y) * 0.95), math.ceil(max(y) * 1.05))
-
     # create house temperature chart
-    xh.append(time.strftime("%H:%M"))
-    yh.append(house_temp)
-    if len(xh) > 720:
-        yh.pop(0)
-        xh.pop(0)
-    plotenergy.plot_house(xh, yh, math.floor(min(yh) * 0.97), math.ceil(max(yh) * 1.03))
-
+    plotenergy.plot_house(x, yh, math.floor(min(yh) * 0.97), math.ceil(max(yh) * 1.03))
     # blink to tell us, that you are alive for 60 seconds
-    # one second is 1kW.
-    on_time = min(0.2 + solar_power / 1000, 8)
+    # one long blink is a 1kW, short blink 1/4kw.
     while datetime.now().second < 40:
-        relais.led_on()  # show check_light_led
-        time.sleep(on_time)
-        relais.led_off()
-        time.sleep(9-on_time)
+        relais.led_blink_sun_kw(solar_power)  # indicate solar power with the blinking LED
     # sync with minutes
     while datetime.now().second > 39:
-        relais.led_on()  # show check_light_led
-        time.sleep(on_time)
-        relais.led_off()
-        time.sleep(9-on_time)
+        relais.led_blink_sun_kw(solar_power)
 # repeat for a long time

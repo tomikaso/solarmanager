@@ -12,8 +12,9 @@ def plot_boiler(x, y, miny, maxy):
         ax.set(xlim=(0, len(x)), xticks=np.arange(pos1, len(x), 60),
                ylim=(miny, maxy), yticks=np.arange(miny, maxy, 2))
     else:
-        ax.set(xlim=(0, len(x)), xticks=np.arange(1, len(x), int((len(x)+10)/10)),
+        ax.set(xlim=(0, len(x)), xticks=np.arange(1, len(x), int((len(x) + 10) / 10)),
                ylim=(miny, maxy), yticks=np.arange(miny, maxy, 2))
+    fig.autofmt_xdate()
     plt.ylabel('temperature')
     plt.title('Boiler temperature')
     plt.savefig("/var/www/html/boiltemp.png", dpi=100)
@@ -38,8 +39,9 @@ def plot_energy(x, y1, y2, y3, y4, y5, y6, miny, maxy):
         ax.set(xlim=(0, len(x)), xticks=np.arange(pos1, len(x), 60),
                ylim=(miny, maxy), yticks=np.arange(miny, maxy, 1000))
     else:
-        ax.set(xlim=(0, len(x)), xticks=np.arange(1, len(x), int((len(x)+10)/10)),
+        ax.set(xlim=(0, len(x)), xticks=np.arange(1, len(x), int((len(x) + 10) / 10)),
                ylim=(miny, maxy), yticks=np.arange(miny, maxy, 1000))
+    fig.autofmt_xdate()
     plt.ylabel('power')
     plt.title('Electric power')
     plt.legend()
@@ -58,8 +60,9 @@ def plot_house(x, y, miny, maxy):
         ax.set(xlim=(0, len(x)), xticks=np.arange(pos1, len(x), 60),
                ylim=(miny, maxy), yticks=np.arange(miny, maxy, 1))
     else:
-        ax.set(xlim=(0, len(x)), xticks=np.arange(1, len(x), int((len(x)+10)/10)),
+        ax.set(xlim=(0, len(x)), xticks=np.arange(1, len(x), int((len(x) + 10) / 10)),
                ylim=(miny, maxy), yticks=np.arange(miny, maxy, 1))
+    fig.autofmt_xdate()
     plt.ylabel('temperature')
     plt.title('Living room temperature')
     plt.savefig("/var/www/html/housetemp.png", dpi=100)

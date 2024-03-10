@@ -1,5 +1,6 @@
 # Module to control relais
 import RPi.GPIO as GPIO
+import time
 
 def init_relais():
     GPIO.setmode(GPIO.BCM) # GPIO Numbers instead of board numbers
@@ -34,14 +35,19 @@ def heatpump_appreciated():
     GPIO.output(5, GPIO.HIGH) # appreciated = 5
     GPIO.output(19, GPIO.LOW) # blocked = 19
 
-def led_on():
-    GPIO.output(18, GPIO.HIGH) # on led = 18
-
-def led_off():
-    GPIO.output(18, GPIO.LOW) # off led = 18
-    
-
-
-
-
-
+def led_blink_sun_kw(power):
+    current_kw = int(power / 1000)
+    leftover = int((max(260, power) - current_kw * 1000)/250)
+    while current_kw > 0:
+        GPIO.output(18, GPIO.HIGH)  # 1blink == 1kw
+        time.sleep(0.8)
+        GPIO.output(18, GPIO.LOW)  # off led = 18
+        time.sleep(0.3)
+        current_kw = current_kw - 1
+    while leftover > 0:
+        GPIO.output(18, GPIO.HIGH)  # 1blink == 0.25kw
+        time.sleep(0.2)
+        GPIO.output(18, GPIO.LOW)  # off led = 18
+        time.sleep(0.2)
+        leftover = leftover - 1
+    time.sleep(3)
