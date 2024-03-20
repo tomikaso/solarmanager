@@ -110,22 +110,20 @@ while True:
         LoadPower = 0
         GridPower = 0
     # increment sums
-    seconds_since = (today - today_previous).total_seconds()
-    today_previous = today
-    sum_solar += solar_power / 1000 * seconds_since / 3600
-    sum_load += LoadPower / 1000 * seconds_since / 3600
+    sum_solar += solar_power / 1000 / 60
+    sum_load += LoadPower / 1000 / 60
     if GridPower > 0:
-        sum_grid += GridPower / 1000 * seconds_since / 3600
+        sum_grid += GridPower / 1000 / 60
     else:
-        sum_export += -GridPower / 1000 * seconds_since / 3600
+        sum_export += -GridPower / 1000 / 60
 
     # sum up plug and boiler time
     if boiler_state == "exceed" or boiler_state == "disinfect":
-        minutes_boiler = minutes_boiler + seconds_since / 60
+        minutes_boiler = minutes_boiler + 1
     if plug1_state == "on":
-        minutes_plug = minutes_plug + seconds_since / 60
+        minutes_plug = minutes_plug + 1
     if heatpump_state == "blocked":
-        sum_hp_blocked = sum_hp_blocked + seconds_since / 60
+        sum_hp_blocked = sum_hp_blocked + 1
 
     # reset sums on midnight
     now = datetime.now()
