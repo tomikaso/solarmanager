@@ -8,7 +8,7 @@ import temperature
 from datetime import datetime, timezone, timedelta
 import plotenergy
 import constants
-
+import meteo
 
 # own functions
 def runtime(minute_display):
@@ -48,6 +48,9 @@ sum_grid = 0
 sum_export = 0
 sum_hp_blocked = 0
 today_previous = datetime.now(timezone.utc)
+meteoOnline = 'false'
+meteoString = '<table><td>yet no meteo data</td></table>'
+meteoTiming = 0
 
 # determine last disinfection after restart
 solar_status_file = open('/home/solarmanager/Documents/solarstatus.txt', "r")
@@ -136,6 +139,23 @@ while True:
         sum_grid = 0
         sum_export = 0
 
+    # get meteo data
+    if localTime.minute == 20 or localTime.minute == 50:
+        meteo_forcast = meteo.get_meteo()
+        if meteo_forcast.status == 'online':
+            meteoOnline = 'true'
+            meteoString = meteo_forcast.html_string
+            if meteo_forcast.timing == 'better today':
+                meteoTiming = 1
+            elif meteo_forcast.timing == 'better tomorrow':
+                meteoTiming = -1
+            else:
+                meteoTiming = 0
+        else:
+            meteoOnline = 'false'
+            meteoString = meteo_forcast.html_string
+            meteoTiming = 0
+
     # get temperature from sensors
     boiler_temp = temperature.read_sensor(pathBoiler)  # measured on top of the boiler
     house_temp = temperature.read_sensor(pathHouse)  # living-room
@@ -164,7 +184,7 @@ while True:
 
     # boiler on-condition exceed of energy
     if (status == "online") and (boiler_temp < boiler_max - boiler_hysteresis) and (
-            GridPower < -6500 * astro_data.autum_haze) \
+            GridPower < (-6400 * astro_data.autum_haze + max(meteoTiming * 400, 0))) \
             and boiler_state == "off" and astro_data.theo_power > 5000 and heatpump_state != "appreciated":
         relais.boiler_on()
         boiler_state = "exceed"
@@ -177,7 +197,7 @@ while True:
     if (boiler_state == "off") and (status == "online") and (
             no_disinfect.days > disinfect_max_interval) and heatpump_state != "appreciated" \
             and (astro_data.utctime > 10.5) and (astro_data.utctime < 15) \
-            and ((GridPower < - 3000 and astro_data.theo_power > 4000) or
+            and ((GridPower < (-0.4 + meteoTiming/10) * astro_data.theo_max and astro_data.theo_power > 4000) or
                  ((no_disinfect.days > disinfect_max_interval + 3) and (
                          astro_data.utctime > 12.6) and today.weekday() > 4)):
         relais.boiler_on()
@@ -188,10 +208,10 @@ while True:
     # boiler off condition
     if status != "online" \
             or boiler_temp >= boiler_max \
-            or (boiler_state == "exceed" and (GridPower > 1200 or solar_power < 4800)) \
+            or (boiler_state == "exceed" and (GridPower > (1200 + max(meteoTiming * 400, 0)) or solar_power < 4800)) \
             or (boiler_state == "disinfect" and boiler_temp >= disinfect_target) \
             or ((no_disinfect.days <= disinfect_max_interval + 3) and (boiler_state == "disinfect") and (
-            GridPower > 5000 or solar_power < 1500)) \
+            GridPower > 5000 or solar_power < 1200)) \
             or (GridPower > 8000):
         relais.boiler_off()
         boiler_state = "off"
@@ -220,15 +240,15 @@ while True:
     Status_str += "<br>grid: " + str(GridPower) + "<br>load: " + str(LoadPower) + "<br>boiler-temp: " + str(
         boiler_temp) + "<br>house-temp: " + str(house_temp)
     Status_str += "<br>solar kwh: " + str(round(sum_solar, 2)) + "<br>export kwh: " + str(
-        round(sum_export, 2)) + "<br>heatpump: " + heatpump_state + "</td><td>"
+        round(sum_export, 2)) + "</td><td>"
     Status_str += "status: " + status + "<br>theoretical radiation: " + str(round(astro_data.theo_power, 1))
     Status_str += "<br>max declination: " + str(round(astro_data.maxdeclination, 2)) + "<br>last disinfection: " + str(
         disinfected.strftime("%d/%m/%Y"))
-    Status_str += "<br>boiler-state-since: " + str(boiler_state_since.strftime("%H:%M")) + "<br>up since: " + str(
-        up_since.strftime("%d/%m/%Y, %H:%M"))
+    Status_str += "<br>up since: " + str(up_since.strftime("%d/%m/%Y, %H:%M"))
     Status_str += "<br>own use kwh: " + str(round(sum_load, 2)) + "<br>import kwh: " + str(
-        round(sum_grid, 2)) + "<br>" + "heatpump block: " + runtime(sum_hp_blocked)
+        round(sum_grid, 2)) + "<br>heatpump: " + heatpump_state
     Status_str += "</td><td>" + boiler_pic + "<br>" + runtime(minutes_boiler) + "</td></tr></table>"
+    Status_str += meteoString
     statusfile.write(Status_str)
     statusfile.close()
 
