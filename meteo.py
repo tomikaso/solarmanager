@@ -3,7 +3,7 @@ import requests, json
 # static data to SMA meteoservice
 meteo_sunny = [1, 2, 26, 27]
 meteo_cloudy = [3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 29, 30, 31, 32, 33, 34, 36, 37, 38, 39]
-meteo_overcast = [5, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 28, 40, 41, 42]
+meteo_overcast = [5, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 28, 35, 40, 41, 42]
 
 # get sunshine
 def get_sunshine(weather_symbol):
