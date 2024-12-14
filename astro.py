@@ -10,7 +10,7 @@ class astro:
         if self.post_winter_solistude >= 360:
             self.post_winter_solistude = self.post_winter_solistude - 360
         self.time_equation = - 0.125 * math.sin((self.post_winter_solistude - 16) / 180 * math.pi) - 0.167 * math.sin(self.post_winter_solistude / 90 * math.pi)
-        self.maxdeclination = self.latitude - 23.5 * math.cos(self.post_winter_solistude / 360 * 6.28)
+        self.maxdeclination = 90 - self.latitude - 23.5 * math.cos(self.post_winter_solistude / 360 * 6.28)
         self.daylength = 12.2 - 3.74 * math.cos(self.post_winter_solistude / 360 * 6.28)
         self.sunrise = 11.95 - self.longitude/15 - self.time_equation - self.daylength / 2
         self.sunset = self.sunrise + self.daylength

@@ -205,7 +205,7 @@ while True:
     if (boiler_state == "off") and (status == "online") and (
             no_disinfect.days > disinfect_max_interval) and heatpump_state != "appreciated" \
             and (astro_data.utctime > 10.5) and (astro_data.utctime < 15) \
-            and ((GridPower < (-0.4 + meteoTiming/10) * astro_data.theo_max and astro_data.theo_power > 4000) or
+            and ((GridPower < (-0.4 + meteoTiming/10) * astro_data.theo_max and astro_data.theo_power > 3600) or
                  ((no_disinfect.days > disinfect_max_interval + 3) and (
                          astro_data.utctime > 12.6) and today.weekday() > 4)):
         relais.boiler_on()
