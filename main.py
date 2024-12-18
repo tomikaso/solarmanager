@@ -169,7 +169,7 @@ while True:
     house_temp = temperature.read_sensor(pathHouse)  # living-room
 
     # determine Heat Pump State blocked: will increase the sensor-temperature of the heatpump by 2.3K (800kOhm parallel)
-    if 44 <= boiler_temp < 48.5 and astro_data.theo_power <= 3000:  # we still have hot water and no sun
+    if 44 <= boiler_temp < 48.5 and astro_data.theo_power <= 2600:  # we still have hot water and no sun
         heatpump_state = "blocked"
         relais.heatpump_blocked()
 
@@ -181,7 +181,7 @@ while True:
 
     # determine Heat Pump State automatic #need to heat up, also with non-solar energy, again automatic, when hot.
     if (boiler_temp < 43.5 or boiler_temp > 48.5) or \
-            (astro_data.theo_power > 3000 and heatpump_state != "appreciated") or \
+            (astro_data.theo_power > 2600 and heatpump_state != "appreciated") or \
             (heatpump_state == "appreciated" and heatpump_appreciated_until < datetime.now()):
         heatpump_state = "automatic"
         relais.heatpump_enabled()
@@ -205,7 +205,7 @@ while True:
     if (boiler_state == "off") and (status == "online") and (
             no_disinfect.days > disinfect_max_interval) and heatpump_state != "appreciated" \
             and (astro_data.utctime > 10.5) and (astro_data.utctime < 15) \
-            and ((GridPower < (-0.4 + meteoTiming/10) * astro_data.theo_max and astro_data.theo_power > 3600) or
+            and ((GridPower < (-0.4 + meteoTiming/10) * astro_data.theo_max and astro_data.theo_power > 3200) or
                  ((no_disinfect.days > disinfect_max_interval + 3) and (
                          astro_data.utctime > 12.6) and today.weekday() > 4)):
         relais.boiler_on()
