@@ -59,7 +59,7 @@ if now.hour == 23 and now.minute > 48 and now.minute < 53:
 
 #write out log
 watchdog_file = open('/home/solarmanager/Documents/watchlog.txt', 'a+')
-if uptime_diff.seconds > 600:
+if 600 < uptime_diff.seconds < 3000:
     Status_str = "\r\n<b>Failed, restarting now: " + str(time.strftime("%d/%m/%Y %H:%M")) + " Uptime-difference: " + str(uptime_diff.seconds) + "</b><br>"
 else:
     Status_str = "\r\nLast Check: " + str(time.strftime("%d/%m/%Y %H:%M")) + " Uptime-difference: " + str(uptime_diff.seconds) + "<br>" + history_copy
@@ -67,5 +67,5 @@ watchdog_file.write(Status_str)
 watchdog_file.close()
 
 #reboot after 10 minutes
-if uptime_diff.seconds > 600:
+if 600 < uptime_diff.seconds < 3000:
     os.system("sudo reboot")
