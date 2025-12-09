@@ -10,6 +10,7 @@ import plotenergy
 import constants
 import meteo
 
+
 # own functions
 def runtime(minute_display):
     if minute_display < 60:
@@ -174,7 +175,8 @@ while True:
         relais.heatpump_blocked()
 
     # determine Heat Pump State appreciated: will reduce the sensor-temperature of the HP by 4.7K (20kOhm in series)
-    if boiler_temp < 48 and astro_data.theo_power > 4000 and GridPower < (-0.4 + meteoTiming/10) * astro_data.theo_max and astro_data.utctime < 12.1:
+    if boiler_temp < 48 and (astro_data.theo_power > 4000 or astro_data.theo_power > 0.9 * astro_data.theo_max) \
+            and GridPower < (-0.4 + meteoTiming/10) * astro_data.theo_max and astro_data.utctime < 12.1:
         heatpump_state = "appreciated"
         heatpump_appreciated_until = datetime.now() + timedelta(minutes=20)
         relais.heatpump_appreciated()
